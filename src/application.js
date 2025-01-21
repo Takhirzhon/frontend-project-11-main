@@ -1,5 +1,3 @@
-/* eslint-disable no-param-reassign  */
-
 import axios from 'axios';
 import i18next from 'i18next';
 import onChange from 'on-change';

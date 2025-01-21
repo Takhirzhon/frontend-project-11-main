@@ -1,10 +1,9 @@
 ### Hexlet tests and linter status:
 [![Actions Status](https://github.com/kakuza73/frontend-project-11/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/kakuza73/frontend-project-11/actions)
-[![Actions Status](https://github.com/kakuza73/frontend-project-11/actions/workflows/nodejs.yml/badge.svg)](https://github.com/kakuza73/frontend-project-11/actions)
 
 **RSS Aggregator**
 
-[Exapmle on Vercel]()
+[Exapmle on Vercel (In process)]()
 
 This is the web application for aggregating RSS feeds, with which it is convenient to read various sources, such as blogs.
 
