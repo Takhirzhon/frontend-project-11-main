@@ -28,7 +28,8 @@ const updateFeeds = (state) => {
         (loadedPost, currentPost) => loadedPost.title === currentPost.title,
       ).map((post) => ({ ...post, id: uniqueId() }));
 
-      state.posts.unshift(...newPosts);
+      const updatedState = { ...state, posts: [...newPosts, ...state.posts] };
+      state = updatedState; // Create new state object
     }));
 
   Promise.all(promise).finally(() => {
@@ -37,30 +38,28 @@ const updateFeeds = (state) => {
 };
 
 const errorState = (error, state) => {
+  let updatedState = { ...state }; // Clone state to avoid direct mutation
   switch (error.name) {
     case 'ValidationError':
-      state.form = { ...state.form, valid: false, error: error.message };
-
+      updatedState.form = { ...updatedState.form, valid: false, error: error.message };
       break;
 
     case 'parserError':
-      state.loadingProcess.error = 'noRSS';
-      state.loadingProcess.status = 'failed';
-
+      updatedState.loadingProcess.error = 'noRSS';
+      updatedState.loadingProcess.status = 'failed';
       break;
 
     case 'AxiosError':
-      state.loadingProcess.error = 'errNet';
-      state.loadingProcess.status = 'failed';
-
+      updatedState.loadingProcess.error = 'errNet';
+      updatedState.loadingProcess.status = 'failed';
       break;
 
     default:
-      state.loadingProcess.error = 'unknown';
-      state.loadingProcess.status = 'failed';
-
+      updatedState.loadingProcess.error = 'unknown';
+      updatedState.loadingProcess.status = 'failed';
       break;
   }
+  return updatedState; // Return the updated state
 };
 
 export default () => {
@@ -125,9 +124,11 @@ export default () => {
 
         validate(currentURL, previousURLs)
           .then(() => {
-            state.form = { ...state.form, valid: true, error: null };
-            state.loadingProcess.status = 'loading';
-
+            const updatedState = { 
+              ...state, 
+              form: { ...state.form, valid: true, error: null },
+              loadingProcess: { status: 'loading', error: null } 
+            };
             return axios.get(
               `https://allorigins.hexlet.app/get?disableCache=true&url=${currentURL}`,
             );
@@ -146,14 +147,18 @@ export default () => {
               feedId: feed.id,
             }));
 
-            state.feeds.unshift(feed);
-            state.posts.unshift(...postsList);
+            const updatedState = {
+              ...state,
+              feeds: [feed, ...state.feeds],
+              posts: [...postsList, ...state.posts],
+              loadingProcess: { error: null, status: 'success' },
+            };
 
-            state.loadingProcess.error = null;
-            state.loadingProcess.status = 'success';
+            state = updatedState; // Update state object
           })
           .catch((error) => {
-            errorState(error, state);
+            const updatedState = errorState(error, state);
+            state = updatedState; // Update state object
           });
       });
 
@@ -164,7 +169,8 @@ export default () => {
 
         const { id } = target.dataset;
 
-        state.modal.postId = id;
+        const updatedState = { ...state, modal: { postId: id } };
+        state = updatedState; // Update state object
 
         state.ui.seenPosts.add(id);
       });
