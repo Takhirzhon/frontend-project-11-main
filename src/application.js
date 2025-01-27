@@ -44,7 +44,7 @@ const errorState = (error, state) => {
   let updatedState = { ...state }; // Clone state to avoid direct mutation
   switch (error.name) {
     case 'ValidationError':
-      updatedState = { 
+      updatedState = {
         ...updatedState,
         form: { ...updatedState.form, valid: false, error: error.message },
       };
@@ -136,10 +136,10 @@ export default () => {
 
         validate(currentURL, previousURLs)
           .then(() => {
-            const updatedState = { 
-              ...state, 
+            const updatedState = {
+              ...state,
               form: { ...state.form, valid: true, error: null },
-              loadingProcess: { status: 'loading', error: null } 
+              loadingProcess: { status: 'loading', error: null },
             };
             return axios.get(
               `https://allorigins.hexlet.app/get?disableCache=true&url=${currentURL}`,
@@ -175,14 +175,15 @@ export default () => {
         if (!('id' in target.dataset)) {
           return;
         }
-
+      
         const { id } = target.dataset;
-
-        const updatedState = { ...state, modal: { postId: id } };
+      
         state.ui.seenPosts.add(id);
-
-        return updatedState; // Use the returned updated state
+        state.modal.postId = id; // Directly modify the state
+      
+        // No return needed here
       });
+      
 
       setTimeout(() => updateFeeds(state), 5000);
     });
