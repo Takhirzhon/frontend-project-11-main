@@ -28,11 +28,14 @@ const updateFeeds = (state) => {
         (loadedPost, currentPost) => loadedPost.title === currentPost.title,
       ).map((post) => ({ ...post, id: uniqueId() }));
 
-      const updatedState = { ...state, posts: [...newPosts, ...state.posts] };
-      state = updatedState; // Create new state object
+      // Return the updated state
+      return {
+        ...state,
+        posts: [...newPosts, ...state.posts],
+      };
     }));
 
-  Promise.all(promise).finally(() => {
+  return Promise.all(promise).finally(() => {
     setTimeout(() => updateFeeds(state), 5000);
   });
 };
@@ -41,22 +44,31 @@ const errorState = (error, state) => {
   let updatedState = { ...state }; // Clone state to avoid direct mutation
   switch (error.name) {
     case 'ValidationError':
-      updatedState.form = { ...updatedState.form, valid: false, error: error.message };
+      updatedState = { 
+        ...updatedState,
+        form: { ...updatedState.form, valid: false, error: error.message },
+      };
       break;
 
     case 'parserError':
-      updatedState.loadingProcess.error = 'noRSS';
-      updatedState.loadingProcess.status = 'failed';
+      updatedState = {
+        ...updatedState,
+        loadingProcess: { error: 'noRSS', status: 'failed' },
+      };
       break;
 
     case 'AxiosError':
-      updatedState.loadingProcess.error = 'errNet';
-      updatedState.loadingProcess.status = 'failed';
+      updatedState = {
+        ...updatedState,
+        loadingProcess: { error: 'errNet', status: 'failed' },
+      };
       break;
 
     default:
-      updatedState.loadingProcess.error = 'unknown';
-      updatedState.loadingProcess.status = 'failed';
+      updatedState = {
+        ...updatedState,
+        loadingProcess: { error: 'unknown', status: 'failed' },
+      };
       break;
   }
   return updatedState; // Return the updated state
@@ -131,34 +143,31 @@ export default () => {
             };
             return axios.get(
               `https://allorigins.hexlet.app/get?disableCache=true&url=${currentURL}`,
-            );
-          })
-          .then((response) => {
-            const { title, description, posts } = parse(response.data.contents);
-            const feed = {
-              id: uniqueId(),
-              url: currentURL,
-              title,
-              description,
-            };
-            const postsList = posts.map((post) => ({
-              ...post,
-              id: uniqueId(),
-              feedId: feed.id,
-            }));
+            ).then((response) => {
+              const { title, description, posts } = parse(response.data.contents);
+              const feed = {
+                id: uniqueId(),
+                url: currentURL,
+                title,
+                description,
+              };
+              const postsList = posts.map((post) => ({
+                ...post,
+                id: uniqueId(),
+                feedId: feed.id,
+              }));
 
-            const updatedState = {
-              ...state,
-              feeds: [feed, ...state.feeds],
-              posts: [...postsList, ...state.posts],
-              loadingProcess: { error: null, status: 'success' },
-            };
-
-            state = updatedState; // Update state object
+              return {
+                ...updatedState,
+                feeds: [feed, ...updatedState.feeds],
+                posts: [...postsList, ...updatedState.posts],
+                loadingProcess: { error: null, status: 'success' },
+              };
+            });
           })
           .catch((error) => {
             const updatedState = errorState(error, state);
-            state = updatedState; // Update state object
+            return updatedState; // Use the returned updated state
           });
       });
 
@@ -170,9 +179,9 @@ export default () => {
         const { id } = target.dataset;
 
         const updatedState = { ...state, modal: { postId: id } };
-        state = updatedState; // Update state object
-
         state.ui.seenPosts.add(id);
+
+        return updatedState; // Use the returned updated state
       });
 
       setTimeout(() => updateFeeds(state), 5000);
