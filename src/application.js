@@ -175,15 +175,14 @@ export default () => {
         if (!('id' in target.dataset)) {
           return;
         }
-      
+
         const { id } = target.dataset;
-      
+
         state.ui.seenPosts.add(id);
         state.modal.postId = id; // Directly modify the state
-      
+
         // No return needed here
       });
-      
 
       setTimeout(() => updateFeeds(state), 5000);
     });
